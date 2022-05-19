@@ -16,6 +16,7 @@ class LoginWin(QWidget):
 
     def __init__(self):
         super(LoginWin, self).__init__()
+        # button initialization
         self.registerBtn = QtWidgets.QPushButton(self)
         self.loginBtn = QtWidgets.QPushButton(self)
         self.pwLabel = QtWidgets.QLabel(self)
@@ -23,6 +24,7 @@ class LoginWin(QWidget):
         self.userInput = QtWidgets.QLineEdit(self)
         self.pwInput = QtWidgets.QLineEdit(self)
         self.warnLabel = QtWidgets.QLabel(self)
+        # ui setup
         setScreenSize()
         self.setWindowTitle("Note4G")
         self.InitUI()
@@ -38,6 +40,7 @@ class LoginWin(QWidget):
         # password input field
         self.pwInput.setGeometry(QtCore.QRect(180, 255, 300, 40))
         self.pwInput.setFont(font)
+        self.pwInput.setEchoMode(QtWidgets.QLineEdit.Password)
         self.pwInput.setObjectName("pwInput")
         self.pwInput.setText("")
         # username label
@@ -68,6 +71,7 @@ class LoginWin(QWidget):
         self.warnLabel.setGeometry(QtCore.QRect(180, 90, 350, 20))
         self.warnLabel.setFont(font)
         self.warnLabel.setObjectName("warnLabel")
+        self.warnLabel.setStyleSheet("color:red;")
 
     def loginCheck(self):
         global loggedIn
@@ -94,8 +98,10 @@ class RegisterWin(QWidget):
 
     def __init__(self):
         super(RegisterWin, self).__init__()
+        # button initialization
         self.label1 = QtWidgets.QLabel(self)
-        int(scrWidth * 0.1), int(scrHeight * 0.05), int(scrWidth * 0.8), int(scrHeight * 0.9)
+        # ui setup
+        setScreenSize()
         self.setWindowTitle("Note4G")
         self.InitUI()
 
@@ -108,12 +114,17 @@ class MainPage(QWidget):
 
     def __init__(self):
         super(MainPage, self).__init__()
+        # button initialization
+        self.note = QtWidgets.QTextEdit(self)
+        # ui setup
         setScreenSize()
         self.setWindowTitle("Note4G")
         self.InitUI()
 
     def InitUI(self):
-        pass
+        self.note.setGeometry(200, 200, 500, 300)
+        self.note.setObjectName("note")
+        self.note.setText("")
 
 # applications initialization
 app = QApplication(sys.argv)
