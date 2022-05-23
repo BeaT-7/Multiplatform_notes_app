@@ -89,6 +89,8 @@ class DBConnection():
         groupIDs = ()
         for group in self.groups:
             groupIDs += (group.id, )
+        if len(groupIDs) == 1:
+            groupIDs +=(0,)
         sql = f"SELECT * FROM note_base.notes WHERE notes.group in {groupIDs}"
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
