@@ -415,6 +415,7 @@ class NotePage(QWidget):
         self.editor.setTextInteractionFlags(
             QtCore.Qt.LinksAccessibleByKeyboard | QtCore.Qt.LinksAccessibleByMouse | QtCore.Qt.TextBrowserInteraction | QtCore.Qt.TextEditable | QtCore.Qt.TextEditorInteraction | QtCore.Qt.TextSelectableByKeyboard | QtCore.Qt.TextSelectableByMouse)
         self.editor.setFont(self.font)
+        self.editor.setText("")
         with open("text.txt", "r") as readFile:
             htmlText = ""
             for row in readFile.readlines():
@@ -434,7 +435,7 @@ app = QApplication(sys.argv)
 widget = QtWidgets.QStackedWidget()
 scrWidth = pyautogui.size()[0]
 scrHeight = pyautogui.size()[1]
-loggedIn = False
+loggedIn = True
 username = ""
 userID = ""
 
@@ -449,7 +450,7 @@ widget.addWidget(loginWin)
 widget.addWidget(registerWin)
 widget.addWidget(mainWin)
 widget.addWidget(noteWin)
-#widget.setCurrentWidget(mainWin)
+widget.setCurrentWidget(noteWin)
 widget.show()
 
 # End GUI
