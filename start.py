@@ -1,5 +1,4 @@
 import sys
-import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import Qt
@@ -409,13 +408,13 @@ class NotePage(QWidget):
         self.editor = QtWidgets.QTextEdit(self)
         self.fontComboBox = QtWidgets.QFontComboBox(self)
         self.spinBox = QtWidgets.QSpinBox(self)
-        self.txtAlignLeft = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-alignment.png')), "", self)
-        self.txtAlignCenter = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-alignment-center.png')), "", self)
-        self.txtAlignRight = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-alignment-right.png')), "", self)
-        self.txtAlignJustify = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-alignment-justify.png')), "", self)
-        self.boldText = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-bold.png')), "", self)
-        self.italicText = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-italic.png')), "", self)
-        self.underlineText = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-underline.png')), "", self)
+        self.txtAlignLeft = QtWidgets.QPushButton(QIcon('images/edit-alignment.png'), "", self)
+        self.txtAlignCenter = QtWidgets.QPushButton(QIcon('images/edit-alignment-center.png'), "", self)
+        self.txtAlignRight = QtWidgets.QPushButton(QIcon('images/edit-alignment-right.png'), "", self)
+        self.txtAlignJustify = QtWidgets.QPushButton(QIcon('images/edit-alignment-justify.png'), "", self)
+        self.boldText = QtWidgets.QPushButton(QIcon('images/edit-bold.png'), "", self)
+        self.italicText = QtWidgets.QPushButton(QIcon('images/edit-italic.png'), "", self)
+        self.underlineText = QtWidgets.QPushButton(QIcon('images/edit-underline.png'), "", self)
         self.export = QtWidgets.QPushButton(self)
         self.closeBtn = QtWidgets.QPushButton(self)
         # ui setup
