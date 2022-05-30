@@ -7,10 +7,14 @@ class DBConnection():
 
     def __init__(self):
         self.connection = mysql.connect(
-            host="localhost",
-            database="note_base",
-            user="noteuser",
-            password="1232"
+            #host="localhost",
+            #database="note_base",
+            #user="noteuser",
+            #password="1232"
+            host="sql11.freemysqlhosting.net",
+            user="sql11496494",
+            password="psppHndwlA",
+            database="sql11496494"
         )
         self.cursor = self.connection.cursor()
         self.conUserId = 0
@@ -57,12 +61,12 @@ class DBConnection():
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
         self.conUserId = int(res[0][0])
-        sql = f"INSERT INTO note_base.groups(owner, group_name) VALUES ('{self.conUserId}', 'Default')"
+        sql = f"INSERT INTO sql11496494.groups(owner, group_name) VALUES ('{self.conUserId}', 'Default')"
         self.cursor.execute(sql)
         self.connection.commit()
 
     def createGroup(self, groupName):
-        sql = f"INSERT INTO note_base.groups(owner, group_name) VALUES ('{self.conUserId}', '{groupName}')"
+        sql = f"INSERT INTO sql11496494.groups(owner, group_name) VALUES ('{self.conUserId}', '{groupName}')"
         self.cursor.execute(sql)
         self.connection.commit()
         self.getAllGroups()
@@ -73,12 +77,13 @@ class DBConnection():
         for group in self.groups:
             if group.name == groupName:
                 id = group.id
-        sql = f"INSERT INTO note_base.notes(notes.group, note_name, text) VALUES ('{id}', '{noteName}', '')"
+        sql = f"INSERT INTO sql11496494.notes(notes.group, note_name, text) VALUES ('{id}', '{noteName}', '')"
         self.cursor.execute(sql)
         self.connection.commit()
+        self.getAllNotes()
 
     def getAllGroups(self):
-        sql = f"SELECT * FROM note_base.groups WHERE owner = {self.conUserId}"
+        sql = f"SELECT * FROM sql11496494.groups WHERE owner = {self.conUserId}"
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
         self.groups = []
@@ -91,19 +96,26 @@ class DBConnection():
             groupIDs += (group.id, )
         if len(groupIDs) == 1:
             groupIDs +=(0,)
-        sql = f"SELECT * FROM note_base.notes WHERE notes.group in {groupIDs}"
+        sql = f"SELECT * FROM sql11496494.notes WHERE notes.group in {groupIDs}"
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
         for group in self.groups:
+            group.notes = []
             for i in range(len(res)):
                 if group.id == res[i][1]:
-                    group.appendNote(Note(res[i][0], res[i][1], res[i][2]))
+                    group.appendNote(Note(res[i][0], res[i][1], res[i][2], res[i][3]))
 
     def getAllGroupNames(self):
         groupNames = []
         for group in self.groups:
             groupNames.append(group.name)
         return groupNames
+
+    def saveNoteText(self, text, note):
+        sql = f"UPDATE sql11496494.notes SET text = '{text}' WHERE id = {self.groups[note[0]].notes[note[1]].id}"
+        sql = sql.replace("'", "\\'").replace("\\' WHERE id = ", "' WHERE id = ").replace('sql11496494.notes SET text = \\', "sql11496494.notes SET text = ")
+        self.cursor.execute(sql)
+        self.connection.commit()
 
 
 dbase = DBConnection()
