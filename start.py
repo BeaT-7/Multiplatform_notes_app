@@ -8,12 +8,16 @@ import pyautogui
 from database import *
 
 
-
 def setScreenSize():
     if not loggedIn:
         widget.setGeometry(200, 200, 800, 600)
     else:
         widget.setGeometry(int(scrWidth*0.1), int(scrHeight*0.05), int(scrWidth*0.8), int(scrHeight*0.9))
+
+def initScreens():
+    global widget, mainWin
+    mainWin = MainPage()
+    widget.addWidget(mainWin)
 
 
 class LoginWin(QWidget):
@@ -82,6 +86,7 @@ class LoginWin(QWidget):
             setScreenSize()
             username = self.userInput.text()
             dbase.setupUser(username)
+            initScreens()
             widget.setCurrentWidget(mainWin)
 
     def toRegisterPage(self):
@@ -134,7 +139,7 @@ class RegisterWin(QWidget):
         self.userLabel.setFont(font)
         self.userLabel.setText("Enter your password:")
         # username input
-        self.userInput.setGeometry(QtCore.QRect(220, 130, 260, 40))#
+        self.userInput.setGeometry(QtCore.QRect(220, 130, 260, 40))
         self.userInput.setFont(font)
         self.userInput.setText("")
         # email label
@@ -242,7 +247,12 @@ class MainPage(QWidget):
         # button initialization
         self.addGroup = QtWidgets.QPushButton(self)
         self.addNote = QtWidgets.QPushButton(self)
-        self.btn = QtWidgets.QPushButton(self)
+        self.noteButtons = []
+        self.labels = []
+        for group in range(len(dbase.groups)):
+            self.labels.append(QtWidgets.QLabel(self))
+            for note in range(len(dbase.groups[group].notes)):
+                self.noteButtons.append(QtWidgets.QPushButton(self))
         # ui setup
         setScreenSize()
         self.setWindowTitle("Note4G")
@@ -255,8 +265,53 @@ class MainPage(QWidget):
         self.addNote.setGeometry(125, 0, 120, 40)
         self.addNote.setText("ADD NOTE")
         self.addNote.clicked.connect(self.addNoteName)
-        self.btn.setGeometry(100,100,100,100)
-        self.btn.setText("aaaaa")
+        self.showNotes()
+
+    def showNotes(self):
+        y = 40
+        noteY = 90
+        noteX = 20
+        counter = 0
+        noteCounter = 0
+        for group in range(len(self.labels)):
+            self.labels[group].setGeometry(0, y, 1500, 40)
+            self.labels[group].setText(dbase.groups[group].name)
+            self.labels[group].setStyleSheet(
+                "font-size: 24px;"
+                "font-weight: 500;"
+                "background-color: #A9A9A9;"
+                "padding-left:20px;"
+            )
+            self.labels[group].show()
+            for note in range(len(dbase.groups[group].notes)):
+                self.noteButtons[noteCounter].setGeometry(noteX, noteY, dbase.groups[group].notes[note].size[0], dbase.groups[group].notes[note].size[1])
+                self.noteButtons[noteCounter].setText(dbase.groups[group].notes[note].name)
+                self.noteButtons[noteCounter].setStyleSheet(
+                    "backgroundcolor: #805353;"
+                    "font-size: 16px"
+                )
+                IDs = (group, note)
+                self.noteButtons[noteCounter].clicked.connect(lambda checked, arg=IDs: self.openEditor(arg))
+                self.noteButtons[noteCounter].show()
+                if counter > 10:
+                    counter = 0
+                    noteX = 20
+                    noteY += 150
+                    y += 200
+                else:
+                    noteX += 110
+                    counter += 1
+                noteCounter += 1
+            y += 200
+            noteY += 200
+            noteX = 20
+
+    def openEditor(self, IDs):
+        htmlText = dbase.groups[IDs[0]].notes[IDs[1]].text
+        noteWin.editor.insertHtml(htmlText)
+        noteWin.currentNote = IDs
+        widget.setCurrentWidget(noteWin)
+
 
     def addGroupName(self):
         self.popUp = PopUp(True)
@@ -277,6 +332,8 @@ class PopUp(QWidget):
         self.name = QtWidgets.QLineEdit(self)
         self.addedLabel = QtWidgets.QLabel(self)
         self.isGroup = isGroup
+        self.groupCombo = QtWidgets.QComboBox(self)
+        self.groupLabel = QtWidgets.QLabel(self)
         # UI setup
         self.setGeometry(300, 300, 450, 300)
         self.InitUI()
@@ -290,6 +347,8 @@ class PopUp(QWidget):
         self.addedLabel.setStyleSheet("color: red;")
         if self.isGroup:
             # Create group window
+            self.groupCombo.hide()
+            self.groupLabel.hide()
             self.setWindowTitle("Add Group")
             self.label.setGeometry(100, 65, 300, 40)
             self.label.setFont(font)
@@ -303,13 +362,11 @@ class PopUp(QWidget):
         else:
             # Create note window
             self.setWindowTitle("Add Note")
-            self.groupCombo = QtWidgets.QComboBox(self)
             self.groupCombo.setGeometry(280, 100, 150, 40)
             self.groupCombo.setFont(font)
             groups = dbase.getAllGroupNames()
             self.groupCombo.addItems(groups)
             self.groupCombo.setCurrentText("Default")
-            self.groupLabel = QtWidgets.QLabel(self)
             self.groupLabel.setGeometry(280, 65, 200, 40)
             self.groupLabel.setFont(font)
             self.groupLabel.setText("Add To Group:")
@@ -324,25 +381,29 @@ class PopUp(QWidget):
             self.button.clicked.connect(self.newNote)
 
     def newGroup(self):
-        if len(self.name.text()) > 30:
+        if len(self.name.text()) > 30 or len(self.name.text()) == 0:
             self.addedLabel.setText("Group name too long!")
         else:
             dbase.createGroup(self.name.text())
+            mainWin.labels.append(QtWidgets.QLabel(mainWin))
+            mainWin.showNotes()
             self.close()
 
     def newNote(self):
-        if len(self.name.text()) > 30:
+        if len(self.name.text()) > 30 or len(self.name.text()) == 0:
             self.addedLabel.setText("Note name too long!")
         else:
             dbase.createNote(self.name.text(), self.groupCombo.currentText())
+            mainWin.noteButtons.append(QtWidgets.QPushButton(mainWin))
+            mainWin.showNotes()
             self.close()
-
 
 
 class NotePage(QWidget):
 
     def __init__(self):
         super(NotePage, self).__init__()
+        self.currentNote = (0, 0)
         # button initialization
         self.font = QtGui.QFont()
         self.editor = QtWidgets.QTextEdit(self)
@@ -356,12 +417,18 @@ class NotePage(QWidget):
         self.italicText = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-italic.png')), "", self)
         self.underlineText = QtWidgets.QPushButton(QIcon(os.path.join('images', 'edit-underline.png')), "", self)
         self.export = QtWidgets.QPushButton(self)
+        self.closeBtn = QtWidgets.QPushButton(self)
         # ui setup
         setScreenSize()
         self.setWindowTitle("Note4G")
         self.InitUI()
 
     def InitUI(self):
+        # close button
+        self.closeBtn.setGeometry(1496, 0, 40,40)
+        self.closeBtn.setText("Close")
+        self.closeBtn.clicked.connect(self.closeEditor)
+        # export button
         self.export.setGeometry(700, 0, 120, 40)
         self.export.setText("export")
         self.export.clicked.connect(self.exportHTML)
@@ -416,11 +483,12 @@ class NotePage(QWidget):
             QtCore.Qt.LinksAccessibleByKeyboard | QtCore.Qt.LinksAccessibleByMouse | QtCore.Qt.TextBrowserInteraction | QtCore.Qt.TextEditable | QtCore.Qt.TextEditorInteraction | QtCore.Qt.TextSelectableByKeyboard | QtCore.Qt.TextSelectableByMouse)
         self.editor.setFont(self.font)
         self.editor.setText("")
-        with open("text.txt", "r") as readFile:
-            htmlText = ""
-            for row in readFile.readlines():
-                htmlText = htmlText + "\n" + row
-            self.editor.insertHtml(htmlText)
+
+    def closeEditor(self):
+        dbase.saveNoteText(self.editor.toHtml(), self.currentNote)
+        self.editor.clear()
+        dbase.getAllNotes()
+        widget.setCurrentWidget(mainWin)
 
     def exportHTML(self):
         text = self.editor.toHtml()
@@ -435,22 +503,20 @@ app = QApplication(sys.argv)
 widget = QtWidgets.QStackedWidget()
 scrWidth = pyautogui.size()[0]
 scrHeight = pyautogui.size()[1]
-loggedIn = True
+loggedIn = False
 username = ""
 userID = ""
 
 # page class initializations
 loginWin = LoginWin()
 registerWin = RegisterWin()
-mainWin = MainPage()
+mainWin = None
 noteWin = NotePage()
 
 # Pages added to StackedWidget and displayed
 widget.addWidget(loginWin)
 widget.addWidget(registerWin)
-widget.addWidget(mainWin)
 widget.addWidget(noteWin)
-widget.setCurrentWidget(noteWin)
 widget.show()
 
 # End GUI
