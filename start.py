@@ -307,6 +307,7 @@ class MainPage(QWidget):
 
     def openEditor(self, IDs):
         htmlText = dbase.groups[IDs[0]].notes[IDs[1]].text
+        noteWin.editor.clear()
         noteWin.editor.insertHtml(htmlText)
         noteWin.currentNote = IDs
         widget.setCurrentWidget(noteWin)
