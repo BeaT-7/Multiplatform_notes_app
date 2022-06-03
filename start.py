@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QFont
 import pyautogui
 from database import *
+import bcrypt
 
 
 def setScreenSize():
@@ -75,18 +76,19 @@ class LoginWin(QWidget):
 
     def loginCheck(self):
         global loggedIn, username
-        res = dbase.loginUser(self.userInput.text(), self.pwInput.text())
-        if len(res) < 1:
-            self.userInput.setText("")
-            self.pwInput.setText("")
-            self.warnLabel.setText("Wrong username or email! Try again!")
-        else:
+        res = dbase.loginUser(self.userInput.text())
+        passw = bytearray(self.pwInput.text(), "UTF-8")
+        if bcrypt.checkpw(bytes(passw), bytes(res[0][3], "UTF-8")):
             loggedIn = True
             setScreenSize()
             username = self.userInput.text()
             dbase.setupUser(username)
             initScreens()
             widget.setCurrentWidget(mainWin)
+        else:
+            self.userInput.setText("")
+            self.pwInput.setText("")
+            self.warnLabel.setText("Wrong username or email! Try again!")
 
     def toRegisterPage(self):
         global loggedIn
@@ -307,6 +309,7 @@ class MainPage(QWidget):
 
     def openEditor(self, IDs):
         htmlText = dbase.groups[IDs[0]].notes[IDs[1]].text
+        noteWin.editor.clear()
         noteWin.editor.insertHtml(htmlText)
         noteWin.currentNote = IDs
         widget.setCurrentWidget(noteWin)
