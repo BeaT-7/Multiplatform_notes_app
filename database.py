@@ -1,6 +1,7 @@
 import mysql.connector as mysql
 from Groups import Group
 from Notes import Note
+import bcrypt
 
 
 class DBConnection():
@@ -34,8 +35,8 @@ class DBConnection():
         self.getAllNotes()
 
 
-    def loginUser(self, username, password):
-        sql = f"SELECT id FROM users WHERE '{username}' = username AND '{password}' = password;"
+    def loginUser(self, username):
+        sql = f"SELECT * FROM users WHERE '{username}' = username"
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
@@ -50,9 +51,12 @@ class DBConnection():
         return self.cursor.fetchall()
 
     def registerUser(self, username, email, password):
+        password = bytearray(password, "UTF-8")
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(bytes(password), salt)
         # create user
         sql = f"INSERT INTO users(username, email, password) VALUES (" \
-              f"'{username}', '{email}', '{password}'" \
+              f"'{username}', '{email}', '{hashed.decode()}'" \
               f")"
         self.cursor.execute(sql)
         self.connection.commit()
