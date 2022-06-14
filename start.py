@@ -43,12 +43,12 @@ class LoginWin(QWidget):
         # username input field
         self.userInput.setGeometry(QtCore.QRect(180, 160, 300, 40))
         self.userInput.setFont(font)
-        self.userInput.setText("testAcc")
+        self.userInput.setText("")
         # password input field
         self.pwInput.setGeometry(QtCore.QRect(180, 255, 300, 40))
         self.pwInput.setFont(font)
         self.pwInput.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.pwInput.setText("lol123")
+        self.pwInput.setText("")
         # username label
         self.userLabel.setGeometry(QtCore.QRect(180, 130, 150, 20))
         self.userLabel.setFont(font)
