@@ -74,6 +74,7 @@ class DBConnection():
         self.cursor.execute(sql)
         self.connection.commit()
         self.getAllGroups()
+        self.getAllNotes()
 
     def createNote(self, noteName, groupName):
         #gets groups ID
@@ -82,6 +83,23 @@ class DBConnection():
             if group.name == groupName:
                 id = group.id
         sql = f"INSERT INTO sql11496494.notes(notes.group, note_name, text) VALUES ('{id}', '{noteName}', '')"
+        self.cursor.execute(sql)
+        self.connection.commit()
+        self.getAllNotes()
+
+    def deleteGroup(self, ID, empty):
+        if not empty:
+            sql = f"DELETE FROM sql11496494.notes WHERE notes.group = {ID}"
+            self.cursor.execute(sql)
+            self.connection.commit()
+        sql = f"DELETE FROM sql11496494.groups WHERE id = {ID}"
+        self.cursor.execute(sql)
+        self.connection.commit()
+        self.getAllGroups()
+        self.getAllNotes()
+
+    def deleteNote(self, ID):
+        sql = f"DELETE FROM sql11496494.notes WHERE id = {ID}"
         self.cursor.execute(sql)
         self.connection.commit()
         self.getAllNotes()

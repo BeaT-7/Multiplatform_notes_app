@@ -250,10 +250,9 @@ class MainPage(QWidget):
         self.addNote = QtWidgets.QPushButton(self)
         self.noteButtons = []
         self.labels = []
-        for group in range(len(dbase.groups)):
-            self.labels.append(QtWidgets.QLabel(self))
-            for note in range(len(dbase.groups[group].notes)):
-                self.noteButtons.append(QtWidgets.QPushButton(self))
+        self.noteDelBtns = []
+        self.groupDelBtns = []
+        self.getAllNotes()
         # ui setup
         setScreenSize()
         self.setWindowTitle("Note4G")
@@ -267,6 +266,30 @@ class MainPage(QWidget):
         self.addNote.setText("ADD NOTE")
         self.addNote.clicked.connect(self.addNoteName)
         self.showNotes()
+
+    def getAllNotes(self):
+        for i in self.noteButtons:
+            i.deleteLater()
+            i = None
+        for i in self.noteDelBtns:
+            i.deleteLater()
+            i = None
+        for i in self.labels:
+            i.deleteLater()
+            i = None
+        for i in self.groupDelBtns:
+            i.deleteLater()
+            i = None
+        self.noteButtons = []
+        self.labels = []
+        self.noteDelBtns = []
+        self.groupDelBtns = []
+        for group in range(len(dbase.groups)):
+            self.labels.append(QtWidgets.QLabel(self))
+            self.groupDelBtns.append(QtWidgets.QPushButton(self))
+            for note in range(len(dbase.groups[group].notes)):
+                self.noteButtons.append(QtWidgets.QPushButton(self))
+                self.noteDelBtns.append(QtWidgets.QPushButton(self))
 
     def showNotes(self):
         y = 40
@@ -283,7 +306,13 @@ class MainPage(QWidget):
                 "background-color: #A9A9A9;"
                 "padding-left:20px;"
             )
+            self.groupDelBtns[group].setGeometry(1420, y + 10, 60, 20)
+            self.groupDelBtns[group].setText("Delete")
+            self.groupDelBtns[group].clicked.connect(lambda checked, arg=group: self.groupDelete(arg))
+
+            self.groupDelBtns[group].show()
             self.labels[group].show()
+
             for note in range(len(dbase.groups[group].notes)):
                 self.noteButtons[noteCounter].setGeometry(noteX, noteY, dbase.groups[group].notes[note].size[0], dbase.groups[group].notes[note].size[1])
                 self.noteButtons[noteCounter].setText(dbase.groups[group].notes[note].name)
@@ -291,9 +320,16 @@ class MainPage(QWidget):
                     "backgroundcolor: #805353;"
                     "font-size: 16px"
                 )
-                IDs = (group, note)
+                IDs = (group, note, noteCounter)
                 self.noteButtons[noteCounter].clicked.connect(lambda checked, arg=IDs: self.openEditor(arg))
+
+                self.noteDelBtns[noteCounter].setGeometry(noteX + 78, noteY + 2, 20, 20)
+                self.noteDelBtns[noteCounter].setText("X")
+                self.noteDelBtns[noteCounter].clicked.connect(lambda checked, arg=IDs: self.noteDelete(arg))
+
+                self.noteDelBtns[noteCounter].show()
                 self.noteButtons[noteCounter].show()
+
                 if counter > 10:
                     counter = 0
                     noteX = 20
@@ -314,6 +350,20 @@ class MainPage(QWidget):
         noteWin.currentNote = IDs
         widget.setCurrentWidget(noteWin)
 
+    def groupDelete(self, val):
+        ID = dbase.groups[val].id
+        empty = True
+        if len(dbase.groups[val].notes) > 0:
+            empty = False
+        dbase.deleteGroup(ID, empty)
+        self.getAllNotes()
+        self.showNotes()
+
+    def noteDelete(self, IDs):
+        ID = dbase.groups[IDs[0]].notes[IDs[1]].id
+        dbase.deleteNote(ID)
+        self.getAllNotes()
+        self.showNotes()
 
     def addGroupName(self):
         self.popUp = PopUp(True)
@@ -387,7 +437,7 @@ class PopUp(QWidget):
             self.addedLabel.setText("Group name too long!")
         else:
             dbase.createGroup(self.name.text())
-            mainWin.labels.append(QtWidgets.QLabel(mainWin))
+            mainWin.getAllNotes()
             mainWin.showNotes()
             self.close()
 
@@ -396,7 +446,7 @@ class PopUp(QWidget):
             self.addedLabel.setText("Note name too long!")
         else:
             dbase.createNote(self.name.text(), self.groupCombo.currentText())
-            mainWin.noteButtons.append(QtWidgets.QPushButton(mainWin))
+            mainWin.getAllNotes()
             mainWin.showNotes()
             self.close()
 
